@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחירון קיוסק - גרסה סופית</title>
+    <title>מחירון קיוסק - כולל חיפוש</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
 
-        /* מסגרת מסתובבת (RGB) */
+        /* מסגרת מסתובבת */
         .product-card {
             position: relative;
             width: 100%;
@@ -40,7 +40,6 @@
             animation: rotateRGB 4s linear infinite;
         }
 
-        /* תוכן פנימי */
         .card-inner {
             position: relative;
             flex: 1;
@@ -52,12 +51,8 @@
             flex-direction: column;
         }
 
-        /* אפקט לחיצה (Pulse) */
-        .product-card.tap-pulse {
-            transform: scale(0.95);
-        }
+        .product-card.tap-pulse { transform: scale(0.95); }
 
-        /* באדג' מבצע זוהר */
         .sale-badge {
             position: absolute;
             top: 12px;
@@ -73,19 +68,11 @@
             font-size: 14px;
             box-shadow: 0 0 15px #fbbf24;
             z-index: 10;
-            cursor: pointer;
             animation: saleGlow 1.5s ease-in-out infinite alternate;
         }
 
-        @keyframes rotateRGB {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes saleGlow {
-            from { transform: scale(1); box-shadow: 0 0 5px #fbbf24; }
-            to { transform: scale(1.1); box-shadow: 0 0 15px #fbbf24; }
-        }
+        @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes saleGlow { from { transform: scale(1); } to { transform: scale(1.1); } }
 
         .img-box {
             width: 100%;
@@ -97,11 +84,7 @@
             flex-shrink: 0;
         }
 
-        .img-box img {
-            max-width: 85%;
-            max-height: 85%;
-            object-fit: contain;
-        }
+        .img-box img { max-width: 85%; max-height: 85%; object-fit: contain; }
 
         .admin-fab {
             position: fixed;
@@ -118,18 +101,31 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 100;
         }
+
+        /* עיצוב שורת החיפוש */
+        #searchInput {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="p-6 text-center">
-        <h1 class="text-3xl font-extrabold tracking-tight">מחירון <span class="text-blue-500">קיוסק</span></h1>
+        <h1 class="text-3xl font-extrabold tracking-tight">מחירון <span class="text-blue-500 font-light">קיוסק</span></h1>
     </header>
 
     <div class="max-w-2xl mx-auto px-4">
+        
+        <div class="mb-6 relative">
+            <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חפש מוצר..." class="w-full p-4 pr-12 rounded-2xl text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        </div>
+
         <div id="adminPanel" class="hidden mb-8 p-6 bg-slate-800 rounded-3xl border border-white/10 space-y-3">
-            <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none">
-            <input type="number" id="itemPrice" placeholder="מחיר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none">
+            <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none border border-white/5">
+            <input type="number" id="itemPrice" placeholder="מחיר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none border border-white/5">
             <input type="file" id="itemFile" class="text-xs text-slate-400 p-2 w-full">
             <button onclick="addProduct()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">שמור מוצר</button>
         </div>
@@ -160,6 +156,7 @@
         const IMGBB_API_KEY = "8186ffc22c58e0157c43a8f56cfad311";
 
         let isAdmin = false;
+        let searchQuery = '';
 
         window.toggleAdmin = () => {
             isAdmin = !isAdmin;
@@ -197,6 +194,11 @@
             setTimeout(() => el.classList.remove('tap-pulse'), 200);
         };
 
+        window.searchProducts = () => {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            renderProducts(window.lastSnapshot);
+        };
+
         window.deleteItem = async (id) => {
             if (confirm("למחוק?")) await deleteDoc(doc(db, "products", id));
         };
@@ -219,8 +221,9 @@
             
             snapshot.forEach((doc) => {
                 const item = doc.data();
+                if (!item.name.toLowerCase().includes(searchQuery)) return;
+
                 const cardId = `card_${doc.id}`;
-                
                 grid.innerHTML += `
                     <div class="product-card" id="${cardId}">
                         ${isAdmin ? `

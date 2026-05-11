@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחירון קיוסק</title>
+    <title>מחירון קיוסק דינמי</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -11,81 +11,65 @@
         
         body { 
             font-family: 'Assistant', sans-serif; 
-            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            background: #0f172a;
             color: #f8fafc;
             margin: 0;
             min-h-screen;
         }
 
-        /* הגדרת כרטיס המוצר עם תאורת אווירה */
+        /* הכרטיס הראשי שמשמש כמסגרת זזה */
         .product-card {
-            background: #1e293b;
-            border-radius: 1.25rem;
-            position: relative; /* חובה בשביל המסגרת */
-            overflow: hidden; /* מונע מהתאורה לצאת */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 100%;
+            border-radius: 1.5rem;
+            padding: 3px; /* עובי המסגרת הצבעונית */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        /* הגדרת תאורת אווירה (Ambient Light Border) */
+        /* האנימציה של הצבעים המסתובבים */
         .product-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 1.25rem;
-            padding: 2.5px; /* עובי המסגרת */
-            background: linear-gradient(135deg, #3b82f6 0%, #a855f7 33%, #ef4444 66%, #22c55e 100%);
-            -webkit-mask: 
-                linear-gradient(#fff 0 0) content-box, 
-                linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.8; /* עוצמת התאורה */
+            width: 150%;
+            height: 150%;
+            background: conic-gradient(
+                #3b82f6, #a855f7, #ef4444, #22c55e, #3b82f6
+            );
+            animation: rotate 4s linear infinite;
         }
 
-        /* הוספת ה"בוהק" (Glow Effect) */
-        .product-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 1.25rem;
-            box-shadow: 
-                0 0 10px rgba(59, 130, 246, 0.2), 
-                0 0 20px rgba(168, 53, 247, 0.2), 
-                0 0 30px rgba(239, 68, 68, 0.2);
-            opacity: 0.6;
+        /* התוכן הפנימי של הכרטיס (מסתיר את האמצע של הגרדיאנט) */
+        .card-inner {
+            position: relative;
+            width: 100%;
+            background: #1e293b;
+            border-radius: 1.4rem;
+            z-index: 1;
+            overflow: hidden;
         }
 
-        /* אפקט בחירה */
-        .product-card:active {
-            transform: scale(0.96);
-            background: #334155;
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .img-box {
             width: 100%;
             height: 180px;
-            background: #0f172a;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-            z-index: 1; /* מוודא שהתמונה מעל התאורה */
+            background: white; /* רקע לבן לתמונות מוצרים כמו במנטוס */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .img-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* מוודא שהטקסט מעל התאורה */
-        .card-content {
-            position: relative;
-            z-index: 1;
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
         .admin-fab {
@@ -100,9 +84,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
             z-index: 100;
-            cursor: pointer;
         }
 
         ::-webkit-scrollbar { display: none; }
@@ -110,33 +93,27 @@
 </head>
 <body class="pb-24">
 
-    <header class="p-8 text-center">
-        <h1 class="text-3xl font-extrabold tracking-tight">מחירון <span class="text-blue-500">קיוסק</span></h1>
+    <header class="p-6 text-center">
+        <h1 class="text-3xl font-extrabold tracking-tight">מחירון <span class="text-blue-500">דיגיטלי</span></h1>
     </header>
 
     <div class="max-w-2xl mx-auto px-4">
         
-        <div id="adminPanel" class="hidden mb-8 p-6 bg-slate-800/80 backdrop-blur-md rounded-3xl border border-white/10 relative z-50">
+        <div id="adminPanel" class="hidden mb-8 p-6 bg-slate-800/90 backdrop-blur-md rounded-3xl border border-white/10 z-50 relative">
             <h2 class="text-lg font-bold mb-4">מוצר חדש</h2>
             <div class="grid gap-3">
-                <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
-                <input type="number" id="itemPrice" placeholder="מחיר" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
-                <select id="itemCategory" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
-                    <option value="שתייה">שתייה</option>
-                    <option value="חטיפים">חטיפים</option>
-                    <option value="סיגריות">סיגריות</option>
-                    <option value="אחר">אחר</option>
-                </select>
+                <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none">
+                <input type="number" id="itemPrice" placeholder="מחיר" class="w-full p-3 rounded-xl bg-slate-900 text-white outline-none">
                 <input type="file" id="itemFile" class="text-xs text-slate-400 p-2">
-                <button onclick="addProduct()" class="bg-blue-600 text-white font-bold py-3 rounded-xl">שמור למחירון</button>
+                <button onclick="addProduct()" class="bg-blue-600 text-white font-bold py-3 rounded-xl">הוסף למחירון</button>
             </div>
         </div>
 
         <div class="mb-6">
-            <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חיפוש מהיר..." class="w-full p-4 rounded-2xl bg-slate-800 border-none text-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חיפוש מהיר..." class="w-full p-4 rounded-2xl bg-slate-800 border-none text-lg outline-none">
         </div>
 
-        <div id="productsGrid" class="grid grid-cols-2 gap-6 pb-12">
+        <div id="productsGrid" class="grid grid-cols-2 gap-5">
             </div>
     </div>
 
@@ -167,7 +144,6 @@
         window.toggleAdmin = () => {
             isAdmin = !isAdmin;
             document.getElementById('adminPanel').classList.toggle('hidden');
-            document.getElementById('adminIcon').className = isAdmin ? 'fa-solid fa-xmark' : 'fa-solid fa-pen-nib';
             renderProducts(window.lastSnapshot);
         };
 
@@ -182,13 +158,12 @@
         window.addProduct = async () => {
             const name = document.getElementById('itemName').value;
             const price = document.getElementById('itemPrice').value;
-            const category = document.getElementById('itemCategory').value;
             const file = document.getElementById('itemFile').files[0];
             if (!name || !price || !file) return alert("חסרים פרטים");
 
             try {
                 const imageUrl = await uploadImage(file);
-                await addDoc(collection(db, "products"), { name, price: parseFloat(price), category, image: imageUrl, createdAt: serverTimestamp() });
+                await addDoc(collection(db, "products"), { name, price: parseFloat(price), image: imageUrl, createdAt: serverTimestamp() });
                 location.reload();
             } catch (e) { alert(e.message); }
         };
@@ -222,19 +197,21 @@
                 const item = doc.data();
                 if (item.name.toLowerCase().includes(searchQuery)) {
                     grid.innerHTML += `
-                        <div class="product-card">
-                            <div class="img-box rounded-t-[1.25rem]">
-                                <img src="${item.image}" class="rounded-t-[1.25rem]">
-                            </div>
-                            <div class="card-content p-4 text-center">
-                                <h3 class="text-lg font-semibold truncate">${item.name}</h3>
-                                <div class="text-2xl font-extrabold mt-1 text-white">₪${item.price}</div>
-                                ${isAdmin ? `
-                                    <div class="flex gap-2 justify-center mt-3 border-t border-white/5 pt-3">
-                                        <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-blue-400 text-sm p-1 hover:text-white"><i class="fa-solid fa-edit"></i></button>
-                                        <button onclick="deleteItem('${doc.id}')" class="text-red-400 text-sm p-1 hover:text-white"><i class="fa-solid fa-trash"></i></button>
-                                    </div>
-                                ` : ''}
+                        <div class="product-card shadow-2xl">
+                            <div class="card-inner">
+                                <div class="img-box">
+                                    <img src="${item.image}">
+                                </div>
+                                <div class="p-4 text-center">
+                                    <h3 class="text-sm font-bold truncate text-slate-300">${item.name}</h3>
+                                    <div class="text-2xl font-black mt-1">₪${item.price}</div>
+                                    ${isAdmin ? `
+                                        <div class="flex gap-4 justify-center mt-3 border-t border-white/5 pt-3">
+                                            <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-blue-400"><i class="fa-solid fa-edit"></i></button>
+                                            <button onclick="deleteItem('${doc.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    ` : ''}
+                                </div>
                             </div>
                         </div>
                     `;

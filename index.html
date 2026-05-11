@@ -3,139 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ניהול קיוסק</title>
+    <title>ניהול מוצרי קיוסק</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .product-card { transition: transform 0.2s; }
-        .product-card:hover { transform: scale(1.02); }
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;700&display=swap');
+        body { font-family: 'Assistant', sans-serif; }
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { transform: translateY(-5px); shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
+<body class="bg-gray-50 min-h-screen">
 
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-center mb-8 text-blue-800">מערכת ניהול קיוסק</h1>
+    <div class="max-w-5xl mx-auto p-4">
+        <header class="text-center py-8">
+            <h1 class="text-4xl font-extrabold text-blue-900 mb-2">ניהול קטלוג קיוסק</h1>
+            <p class="text-gray-600">הוספת מוצרים ועדכון מחירים בזמן אמת</p>
+        </header>
 
-        <!-- טופס הוספת מוצר (ממשק ניהול) -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-10">
-            <h2 class="text-xl font-semibold mb-4">הוספת מוצר חדש</h2>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-10">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">הוספת מוצר חדש</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="itemName" placeholder="שם המוצר" class="border p-2 rounded">
-                <input type="number" id="itemPrice" placeholder="מחיר" class="border p-2 rounded">
-                <input type="file" id="itemImage" accept="image/*" class="border p-2 rounded">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">שם המוצר</label>
+                    <input type="text" id="itemName" placeholder="לדוגמה: קולה זירו" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">מחיר (₪)</label>
+                    <input type="number" id="itemPrice" placeholder="0.00" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">קישור לתמונה</label>
+                    <input type="text" id="itemImageUrl" placeholder="הדבק כאן לינק לתמונה" class="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
             </div>
-            <button onclick="uploadProduct()" id="uploadBtn" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 w-full md:w-auto">
-                העלה מוצר
+            <button onclick="addProduct()" id="addBtn" class="mt-6 bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition w-full md:w-auto shadow-md shadow-blue-200">
+                פרסם מוצר באתר
             </button>
-            <div id="status" class="mt-2 text-sm text-gray-600"></div>
+            <p id="status" class="mt-3 text-sm font-medium text-blue-600 hidden">שומר נתונים...</p>
         </div>
 
-        <hr class="mb-10">
-
-        <!-- תצוגת המוצרים -->
-        <h2 class="text-2xl font-bold mb-6 text-gray-700">התפריט שלנו</h2>
-        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- כאן יופיעו המוצרים מהדאטה-בייס -->
-            <p class="text-gray-500">טוען מוצרים...</p>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">המוצרים באתר</h2>
+            <span id="productCount" class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 מוצרים</span>
         </div>
+        
+        <div id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            </div>
     </div>
 
-    <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // TODO: החלף בפרטי הפרויקט שלך מ-Firebase Console
+        // החלף את הפרטים הבאים מה-Firebase Console שלך
         const firebaseConfig = {
-            // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyC98bjwab2vlA9MYte7mjsDwKTvp7hW6Gs",
-  authDomain: "kiosk-web-55899.firebaseapp.com",
-  projectId: "kiosk-web-55899",
-  storageBucket: "kiosk-web-55899.firebasestorage.app",
-  messagingSenderId: "593665505846",
-  appId: "1:593665505846:web:df4c0982776560e4803697"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        // אתחול
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        // פונקציה להעלאת מוצר
-        window.uploadProduct = async () => {
+        // פונקציה להוספת מוצר
+        window.addProduct = async () => {
             const name = document.getElementById('itemName').value;
             const price = document.getElementById('itemPrice').value;
-            const file = document.getElementById('itemImage').files[0];
-            const btn = document.getElementById('uploadBtn');
+            const url = document.getElementById('itemImageUrl').value;
             const status = document.getElementById('status');
 
-            if (!name || !price || !file) {
-                alert("נא למלא את כל השדות ולבחור תמונה");
+            if (!name || !price || !url) {
+                alert("חובה למלא שם, מחיר ולינק לתמונה");
                 return;
             }
 
             try {
-                btn.disabled = true;
-                status.innerText = "מעלה תמונה...";
-
-                // 1. העלאת תמונה ל-Storage
-                const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-                const snapshot = await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(snapshot.ref);
-
-                status.innerText = "שומר נתונים...";
-
-                // 2. שמירת המידע ב-Firestore
+                status.classList.remove('hidden');
                 await addDoc(collection(db, "products"), {
                     name: name,
                     price: parseFloat(price),
-                    image: downloadURL,
-                    createdAt: new Date()
+                    image: url,
+                    createdAt: serverTimestamp()
                 });
 
-                status.innerText = "המוצר נוסף בהצלחה!";
+                // איפוס שדות
                 document.getElementById('itemName').value = '';
                 document.getElementById('itemPrice').value = '';
-                document.getElementById('itemImage').value = '';
-            } catch (error) {
-                console.error(error);
-                alert("שגיאה בהעלאה: " + error.message);
-            } finally {
-                btn.disabled = false;
+                document.getElementById('itemImageUrl').value = '';
+                status.classList.add('hidden');
+            } catch (e) {
+                console.error(e);
+                alert("שגיאה בשמירה: " + e.message);
+                status.classList.add('hidden');
             }
         };
 
-        // פונקציה למשיכת מוצרים והצגתם בזמן אמת
+        // משיכת נתונים והצגה בזמן אמת
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         onSnapshot(q, (snapshot) => {
             const grid = document.getElementById('productsGrid');
+            const countLabel = document.getElementById('productCount');
             grid.innerHTML = '';
             
+            countLabel.innerText = `${snapshot.size} מוצרים`;
+
             snapshot.forEach((doc) => {
                 const item = doc.data();
                 grid.innerHTML += `
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden product-card">
-                        <img src="${item.image}" class="w-full h-48 object-cover" alt="${item.name}">
-                        <div class="p-4">
-                            <h3 class="text-xl font-bold text-gray-800">${item.name}</h3>
-                            <p class="text-blue-600 font-bold text-lg mt-2">₪${item.price}</p>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden product-card">
+                        <div class="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <img src="${item.image}" alt="${item.name}" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                        </div>
+                        <div class="p-4 text-center">
+                            <h3 class="text-lg font-bold text-gray-800 truncate">${item.name}</h3>
+                            <p class="text-blue-600 font-extrabold text-xl mt-1">₪${item.price}</p>
                         </div>
                     </div>
                 `;
             });
 
             if (snapshot.empty) {
-                grid.innerHTML = '<p class="col-span-full text-center text-gray-500">אין מוצרים להצגה.</p>';
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">אין מוצרים בקטלוג. הוסף את המוצר הראשון למעלה!</p>';
             }
         });
     </script>

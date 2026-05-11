@@ -7,82 +7,96 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap');
         
         body { 
             font-family: 'Assistant', sans-serif; 
-            background-color: #1e293b; /* רקע כחול-כהה כמו בצילום מסך */
-            color: #ffffff;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
             margin: 0;
+            min-h-screen;
         }
 
         .product-card {
-            background-color: #2d3748;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.25rem;
+            transition: all 0.2s ease;
         }
 
-        .admin-footer {
-            background: rgba(255, 255, 255, 0.95);
-            color: black;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            padding: 15px;
-            border-radius: 2rem;
-            text-align: center;
-            font-weight: 800;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 100;
-            cursor: pointer;
+        .product-card:active {
+            transform: scale(0.98);
+            background: #334155;
         }
 
-        /* מניעת עיוות תמונה */
-        .img-container img {
+        .img-box {
+            width: 100%;
+            height: 180px; /* גודל מוקטן ונוח יותר */
+            background: #0f172a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .img-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
+        .admin-fab {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: #ffffff;
+            color: #000;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        /* הסתרת גלילה */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen pb-32">
+<body class="pb-24">
 
-    <header class="p-6 text-center">
-        <h1 class="text-4xl font-extrabold tracking-tight">מחירון קיוסק <span class="text-slate-400 font-light">יצחק</span></h1>
+    <header class="p-8 text-center">
+        <h1 class="text-3xl font-extrabold tracking-tight">מחירון <span class="text-blue-500">קיוסק</span></h1>
     </header>
 
-    <div class="max-w-4xl mx-auto p-4">
+    <div class="max-w-2xl mx-auto px-4">
         
-        <div id="adminPanel" class="hidden mb-10 p-6 bg-slate-800 rounded-3xl border-2 border-white/10">
-            <h2 class="text-xl font-bold mb-4 text-center">הוספת מוצר חדש</h2>
-            <div class="space-y-4">
-                <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-4 rounded-2xl bg-slate-900 border-none outline-none text-lg">
-                <input type="number" id="itemPrice" placeholder="מחיר ב-₪" class="w-full p-4 rounded-2xl bg-slate-900 border-none outline-none text-lg">
-                <select id="itemCategory" class="w-full p-4 rounded-2xl bg-slate-900 border-none outline-none text-lg">
-                    <option value="שתייה">🥤 שתייה</option>
-                    <option value="חטיפים">🍿 חטיפים</option>
-                    <option value="סיגריות">🚬 סיגריות</option>
-                    <option value="אחר">📦 אחר</option>
+        <div id="adminPanel" class="hidden mb-8 p-6 bg-slate-800/80 backdrop-blur-md rounded-3xl border border-white/10">
+            <h2 class="text-lg font-bold mb-4">מוצר חדש</h2>
+            <div class="grid gap-3">
+                <input type="text" id="itemName" placeholder="שם המוצר" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
+                <input type="number" id="itemPrice" placeholder="מחיר" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
+                <select id="itemCategory" class="w-full p-3 rounded-xl bg-slate-900 border-none text-white outline-none">
+                    <option value="שתייה">שתייה</option>
+                    <option value="חטיפים">חטיפים</option>
+                    <option value="סיגריות">סיגריות</option>
+                    <option value="אחר">אחר</option>
                 </select>
-                <input type="file" id="itemFile" class="w-full p-2 text-sm text-slate-400">
-                <button onclick="addProduct()" id="addBtn" class="w-full bg-blue-500 text-white font-bold py-4 rounded-2xl text-xl">שמור מוצר</button>
+                <input type="file" id="itemFile" class="text-xs text-slate-400 p-2">
+                <button onclick="addProduct()" class="bg-blue-600 text-white font-bold py-3 rounded-xl">שמור למחירון</button>
             </div>
         </div>
 
-        <div class="mb-8">
-            <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חפש מוצר..." class="w-full p-5 rounded-2xl bg-slate-800/50 border border-white/10 text-xl outline-none">
+        <div class="mb-6">
+            <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חיפוש מהיר..." class="w-full p-4 rounded-2xl bg-slate-800 border-none text-lg outline-none focus:ring-2 focus:ring-blue-500 transition-all">
         </div>
 
         <div id="productsGrid" class="grid grid-cols-2 gap-4">
             </div>
     </div>
 
-    <div class="admin-footer" onclick="toggleAdmin()">
-        <span id="adminBtnText">מצב עריכה</span>
+    <div class="admin-fab" onclick="toggleAdmin()">
+        <i id="adminIcon" class="fa-solid fa-pen-nib"></i>
     </div>
 
     <script type="module">
@@ -108,7 +122,7 @@
         window.toggleAdmin = () => {
             isAdmin = !isAdmin;
             document.getElementById('adminPanel').classList.toggle('hidden');
-            document.getElementById('adminBtnText').innerText = isAdmin ? 'צא ממצב עריכה' : 'מצב עריכה';
+            document.getElementById('adminIcon').className = isAdmin ? 'fa-solid fa-xmark' : 'fa-solid fa-pen-nib';
             renderProducts(window.lastSnapshot);
         };
 
@@ -125,7 +139,7 @@
             const price = document.getElementById('itemPrice').value;
             const category = document.getElementById('itemCategory').value;
             const file = document.getElementById('itemFile').files[0];
-            if (!name || !price || !file) return alert("מלא פרטים!");
+            if (!name || !price || !file) return alert("חסרים פרטים");
 
             try {
                 const imageUrl = await uploadImage(file);
@@ -139,7 +153,7 @@
         };
 
         window.updatePrice = async (id, oldPrice) => {
-            const newPrice = prompt("מחיר חדש:", oldPrice);
+            const newPrice = prompt("עדכן מחיר:", oldPrice);
             if (newPrice) await updateDoc(doc(db, "products", id), { price: parseFloat(newPrice) });
         };
 
@@ -163,17 +177,17 @@
                 const item = doc.data();
                 if (item.name.toLowerCase().includes(searchQuery)) {
                     grid.innerHTML += `
-                        <div class="product-card flex flex-col">
-                            <div class="h-56 w-full img-container bg-white/5">
-                                <img src="${item.image}">
+                        <div class="product-card">
+                            <div class="img-box">
+                                <img src="${item.image}" class="rounded-t-[1.25rem]">
                             </div>
-                            <div class="p-4 flex flex-col flex-grow text-center justify-center space-y-2">
-                                <h3 class="text-2xl font-bold leading-tight">${item.name}</h3>
-                                <p class="text-4xl font-black">₪${item.price}</p>
+                            <div class="p-4 text-center">
+                                <h3 class="text-lg font-semibold truncate">${item.name}</h3>
+                                <div class="text-2xl font-extrabold mt-1 text-white">₪${item.price}</div>
                                 ${isAdmin ? `
-                                    <div class="flex gap-4 justify-center mt-2 border-t border-white/10 pt-2">
-                                        <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-white bg-blue-500 p-2 rounded-lg"><i class="fa-solid fa-pen text-sm"></i></button>
-                                        <button onclick="deleteItem('${doc.id}')" class="text-white bg-red-500 p-2 rounded-lg"><i class="fa-solid fa-trash text-sm"></i></button>
+                                    <div class="flex gap-2 justify-center mt-3 border-t border-white/5 pt-3">
+                                        <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-blue-400 text-sm p-1"><i class="fa-solid fa-edit"></i></button>
+                                        <button onclick="deleteItem('${doc.id}')" class="text-red-400 text-sm p-1"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 ` : ''}
                             </div>

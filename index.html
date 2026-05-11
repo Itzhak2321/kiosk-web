@@ -3,122 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>קיוסק פרימיום - ניהול ומכירה</title>
+    <title>מחירון קיוסק - לעובד</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap');
         
         body { 
             font-family: 'Assistant', sans-serif; 
-            background-color: #0a0a0a; 
-            color: #e2e8f0;
+            background-color: #0d0d0d; 
+            color: #ffffff;
             margin: 0;
-            overflow-x: hidden;
         }
 
-        .premium-card {
-            background: #171717; 
-            border: 1px solid #262626;
-            transition: all 0.3s ease;
+        /* כרטיס מוצר במראה נקי ומקצועי */
+        .price-card {
+            background: #1a1a1a; 
+            border: 1px solid #2d2d2d;
+            border-radius: 1.25rem;
+            transition: transform 0.2s;
         }
 
-        .premium-card:hover {
-            border-color: #fbbf24; 
-            transform: translateY(-4px);
+        .price-tag {
+            color: #ffffff;
+            background: #262626;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 800;
         }
-
-        .gold-text { color: #fbbf24; }
-        .gold-bg { background-color: #fbbf24; }
 
         .category-btn {
-            background: #171717;
-            color: #737373;
-            border: 1px solid #262626;
-            transition: all 0.2s;
-            white-space: nowrap;
+            background: #1a1a1a;
+            color: #a3a3a3;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            transition: 0.3s;
         }
 
         .category-btn.active {
             background: #ffffff;
             color: #000000;
             border-color: #ffffff;
-            font-weight: 800;
         }
 
-        input, select {
-            background: #111111 !important;
-            border: 1px solid #262626 !important;
+        input {
+            background: #1a1a1a !important;
+            border: 1px solid #2d2d2d !important;
             color: white !important;
         }
 
+        /* מניעת גלילה אופקית */
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* אנימציית טעינה */
-        .loader {
-            border: 2px solid #262626;
-            border-top: 2px solid #fbbf24;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-left: 8px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen pb-10">
 
-    <header class="p-4 border-b border-neutral-800 bg-black/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-lg md:text-xl font-light tracking-widest">קיוסק <span class="font-extrabold gold-text">יוקרה</span></h1>
-            <button onclick="toggleAdmin()" id="toggleBtn" class="text-[10px] font-bold border border-neutral-700 px-4 py-2 rounded hover:bg-white hover:text-black transition-all">
-                מרכז ניהול <i class="fa-solid fa-gears mr-1"></i>
+    <header class="p-4 border-b border-neutral-800 bg-black/90 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">מחירון <span class="text-neutral-400 font-light">קיוסק</span></h1>
+            <button onclick="toggleAdmin()" id="toggleBtn" class="text-[11px] border border-neutral-700 px-3 py-1.5 rounded-lg opacity-50 hover:opacity-100 transition-all">
+                עריכת מחירים
             </button>
         </div>
     </header>
 
-    <div class="max-w-6xl mx-auto p-4">
+    <div class="max-w-5xl mx-auto p-3 md:p-6">
         
-        <div id="adminPanel" class="hidden mb-8 p-6 premium-card rounded-xl animate-in slide-in-from-top duration-500">
-            <h2 class="text-xs uppercase tracking-widest mb-6 gold-text font-bold">הוספת פריט חדש למלאי</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" id="itemName" placeholder="שם המוצר (למשל: וינסטון לייט)" class="p-3 rounded text-sm outline-none">
-                <input type="number" id="itemPrice" placeholder="מחיר ב-₪" class="p-3 rounded text-sm outline-none">
-                <select id="itemCategory" class="p-3 rounded text-sm outline-none font-bold">
+        <div id="adminPanel" class="hidden mb-8 p-5 price-card">
+            <h2 class="text-sm font-bold mb-4 text-neutral-400">הוספת מוצר חדש למחירון</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input type="text" id="itemName" placeholder="שם המוצר" class="p-3 rounded-xl text-sm outline-none">
+                <input type="number" id="itemPrice" placeholder="מחיר" class="p-3 rounded-xl text-sm outline-none">
+                <select id="itemCategory" class="p-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm outline-none">
                     <option value="שתייה">🥤 שתייה</option>
                     <option value="חטיפים">🍿 חטיפים</option>
                     <option value="סיגריות">🚬 סיגריות</option>
                     <option value="אחר">📦 אחר</option>
                 </select>
-                <div class="flex items-center bg-neutral-900 border border-neutral-800 p-2 rounded">
-                    <input type="file" id="itemFile" class="text-[10px] text-neutral-500 w-full cursor-pointer">
-                </div>
+                <input type="file" id="itemFile" class="text-[10px] p-2 bg-neutral-900 rounded-xl border border-neutral-800">
             </div>
-            <button onclick="addProduct()" id="addBtn" class="mt-6 bg-white text-black text-xs font-bold px-8 py-3 rounded hover:bg-neutral-200 transition-all flex items-center justify-center">
-                <span id="btnText">אישור ופרסום מוצר</span>
-                <div id="btnLoader" class="loader hidden"></div>
+            <button onclick="addProduct()" id="addBtn" class="mt-4 bg-white text-black font-bold px-8 py-3 rounded-xl text-sm hover:bg-neutral-200 transition-all">
+                הוסף למחירון
             </button>
-            <div id="status" class="mt-4 text-xs gold-text hidden"></div>
         </div>
 
-        <div class="mb-8 space-y-4">
-            <div class="relative max-w-md mx-auto">
-                <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm"></i>
-                <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חפש מוצר..." class="w-full pr-10 pl-4 py-3 rounded-full bg-neutral-900 border border-neutral-800 text-sm outline-none focus:border-neutral-600 transition-all">
+        <div class="mb-6 space-y-4">
+            <div class="relative">
+                <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+                <input type="text" id="searchInput" oninput="searchProducts()" placeholder="חיפוש מוצר..." class="w-full pr-12 py-4 rounded-2xl text-lg outline-none focus:border-neutral-500">
             </div>
             
-            <nav class="flex overflow-x-auto gap-2 no-scrollbar pb-2">
-                <button onclick="filterItems('הכל')" class="category-btn active px-8 py-2 rounded-full text-xs font-bold">הכל</button>
-                <button onclick="filterItems('שתייה')" class="category-btn px-8 py-2 rounded-full text-xs font-bold">שתייה</button>
-                <button onclick="filterItems('חטיפים')" class="category-btn px-8 py-2 rounded-full text-xs font-bold">חטיפים</button>
-                <button onclick="filterItems('סיגריות')" class="category-btn px-8 py-2 rounded-full text-xs font-bold">סיגריות</button>
+            <nav class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="filterItems('הכל')" class="category-btn active px-6 py-2.5 text-sm font-bold">הכל</button>
+                <button onclick="filterItems('שתייה')" class="category-btn px-6 py-2.5 text-sm font-bold">שתייה</button>
+                <button onclick="filterItems('חטיפים')" class="category-btn px-6 py-2.5 text-sm font-bold">חטיפים</button>
+                <button onclick="filterItems('סיגריות')" class="category-btn px-6 py-2.5 text-sm font-bold">סיגריות</button>
             </nav>
         </div>
 
-        <div id="productsGrid" class="grid grid-cols-3 gap-3 md:gap-6">
+        <div id="productsGrid" class="grid grid-cols-3 gap-2 md:gap-4">
             </div>
     </div>
 
@@ -162,30 +145,21 @@
             const price = document.getElementById('itemPrice').value;
             const category = document.getElementById('itemCategory').value;
             const file = document.getElementById('itemFile').files[0];
-            const btn = document.getElementById('addBtn');
-            const loader = document.getElementById('btnLoader');
-            
-            if (!name || !price || !file) return alert("אנא מלא את כל השדות וצרף תמונה");
+            if (!name || !price || !file) return alert("מלא פרטים ותמונה");
 
             try {
-                btn.disabled = true; loader.classList.remove('hidden');
                 const imageUrl = await uploadImage(file);
                 await addDoc(collection(db, "products"), { name, price: parseFloat(price), category, image: imageUrl, createdAt: serverTimestamp() });
-                
-                alert("המוצר נוסף בהצלחה!");
-                document.getElementById('itemName').value = ''; 
-                document.getElementById('itemPrice').value = '';
-                document.getElementById('itemFile').value = '';
-            } catch (e) { alert("שגיאה בהעלאה: " + e.message); }
-            finally { btn.disabled = false; loader.classList.add('hidden'); }
+                location.reload();
+            } catch (e) { alert(e.message); }
         };
 
         window.deleteItem = async (id) => {
-            if (confirm("להסיר את המוצר מהמערכת?")) await deleteDoc(doc(db, "products", id));
+            if (confirm("למחוק מהמחירון?")) await deleteDoc(doc(db, "products", id));
         };
 
         window.updatePrice = async (id, oldPrice) => {
-            const newPrice = prompt("הזן מחיר חדש ב-₪:", oldPrice);
+            const newPrice = prompt("מחיר חדש:", oldPrice);
             if (newPrice) await updateDoc(doc(db, "products", id), { price: parseFloat(newPrice) });
         };
 
@@ -220,19 +194,21 @@
 
                 if (matchesFilter && matchesSearch) {
                     grid.innerHTML += `
-                        <div class="premium-card rounded-xl overflow-hidden flex flex-col h-full shadow-lg">
-                            <div class="h-24 md:h-44 bg-white/5 flex items-center justify-center p-2 relative">
+                        <div class="price-card flex flex-col h-full overflow-hidden">
+                            <div class="h-20 md:h-32 bg-white/5 flex items-center justify-center p-2">
                                 <img src="${item.image}" class="max-w-full max-h-full object-contain">
                             </div>
-                            <div class="p-2 md:p-4 flex flex-col flex-grow text-center">
-                                <h3 class="text-[10px] md:text-sm font-semibold mb-1 truncate">${item.name}</h3>
-                                <p class="gold-text font-black text-sm md:text-xl">₪${item.price}</p>
-                                ${isAdmin ? `
-                                    <div class="flex gap-3 mt-3 justify-center border-t border-neutral-800 pt-3">
-                                        <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-neutral-400 hover:text-white transition-colors text-xs"><i class="fa-solid fa-pen-to-square"></i></button>
-                                        <button onclick="deleteItem('${doc.id}')" class="text-neutral-400 hover:text-red-500 transition-colors text-xs"><i class="fa-solid fa-trash-can"></i></button>
-                                    </div>
-                                ` : ''}
+                            <div class="p-2 md:p-3 flex flex-col flex-grow justify-between text-center border-t border-neutral-800">
+                                <h3 class="text-[10px] md:text-sm font-semibold truncate mb-1">${item.name}</h3>
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="text-white font-black text-sm md:text-xl">₪${item.price}</span>
+                                    ${isAdmin ? `
+                                        <div class="flex gap-2 mt-2">
+                                            <button onclick="updatePrice('${doc.id}', ${item.price})" class="text-neutral-500 text-[10px]"><i class="fa-solid fa-edit"></i></button>
+                                            <button onclick="deleteItem('${doc.id}')" class="text-neutral-500 text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                                        </div>
+                                    ` : ''}
+                                </div>
                             </div>
                         </div>
                     `;
